@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 导航 — 发现最好的 AI 工具</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #4F46E5;
+    --accent-hover: #4338CA;
+    --accent-light: #EEF2FF;
+    --accent-soft: rgba(79,70,229,0.08);
+    --bg: #F7F7F5;
+    --surface: #FFFFFF;
+    --surface2: #F0EFF9;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(79,70,229,0.35);
+    --text-primary: #1A1825;
+    --text-secondary: #6B6880;
+    --text-muted: #A09CB0;
+    --sidebar-w: 220px;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-hover: 0 8px 28px rgba(79,70,229,0.14);
+    --font: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  html { font-family: var(--font); background: var(--bg); color: var(--text-primary); scroll-behavior: smooth; }
+  body { display: flex; min-height: 100vh; }
+  a { text-decoration: none; color: inherit; }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    z-index: 100;
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+  .logo-sub { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+
+  .sidebar-section { margin-top: 16px; }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 20px 8px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2.5px solid transparent;
+    position: relative;
+  }
+  .sidebar-item:hover { background: var(--accent-soft); color: var(--accent); border-left-color: transparent; }
+  .sidebar-item.active { background: var(--accent-soft); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+  .sidebar-item .s-icon { font-size: 17px; width: 20px; text-align: center; }
+  .sidebar-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ===== Main Content ===== */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== Hero / Search ===== */
+  .hero {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 32px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    font-weight: 400;
+  }
+
+  .search-wrap {
+    max-width: 600px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    height: 52px;
+    border: 1.5px solid var(--border);
+    border-radius: 26px;
+    padding: 0 52px 0 52px;
+    font-size: 15px;
+    font-family: var(--font);
+    color: var(--text-primary);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+  .search-wrap input::placeholder { color: var(--text-muted); }
+  .search-icon {
+    position: absolute;
+    left: 18px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+    pointer-events: none;
+  }
+  .search-clear {
+    position: absolute;
+    right: 16px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    background: none; border: none;
+    display: none;
+    padding: 4px 6px;
+    border-radius: 50%;
+    transition: background 0.15s;
+    font-family: var(--font);
+  }
+  .search-clear:hover { background: var(--accent-light); color: var(--accent); }
+
+  .search-engines {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .search-engines span { font-weight: 500; }
+  .engine-btn {
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .engine-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* ===== Category Tabs ===== */
+  .tab-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    overflow-x: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+    font-weight: 500;
+    font-family: var(--font);
+    color: var(--text-secondary);
+    border: none;
+    background: none;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-btn .t-emoji { font-size: 15px; }
+
+  /* ===== Tools Grid ===== */
+  .content {
+    padding: 32px 40px;
+    flex: 1;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .section-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: transparent;
+    transition: background 0.2s;
+  }
+  .tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--border-hover);
+  }
+  .tool-card:hover::before { background: var(--accent); }
+
+  .card-top { display: flex; align-items: center; gap: 12px; }
+  .tool-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .tool-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+  .tool-category-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 2px;
+  }
+  .tool-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    flex: 1;
+  }
+  .card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .tool-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 3px;
+    transition: gap 0.15s;
+  }
+  .tool-card:hover .tool-link { gap: 6px; }
+  .free-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  /* ===== Empty State ===== */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .e-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ===== Section dividers ===== */
+  .category-section { margin-bottom: 40px; }
+  .category-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ===== Mobile menu toggle ===== */
+  .menu-toggle {
+    display: none;
+    position: fixed;
+    top: 14px; left: 14px;
+    z-index: 200;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: var(--shadow);
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 99;
+  }
+
+  /* ===== Stats bar ===== */
+  .stats-bar {
+    background: linear-gradient(135deg, #F0EFF9 0%, #EEF2FF 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .stat-item { display: flex; align-items: center; gap: 5px; }
+  .stat-num { color: var(--accent); font-weight: 700; }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.show { display: block; }
+    .main { margin-left: 0; }
+    .menu-toggle { display: flex; align-items: center; }
+    .hero { padding: 60px 20px 28px; }
+    .content { padding: 24px 16px; }
+    .tab-bar { padding: 0 16px; }
+    .stats-bar { padding: 10px 16px; gap: 12px; }
+    .tools-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  }
+  @media (max-width: 480px) {
+    .tools-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ===== Animations ===== */
+  .tool-card {
+    animation: fadeIn 0.35s ease both;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tool-card:nth-child(1) { animation-delay: 0s; }
+  .tool-card:nth-child(2) { animation-delay: 0.04s; }
+  .tool-card:nth-child(3) { animation-delay: 0.08s; }
+  .tool-card:nth-child(4) { animation-delay: 0.12s; }
+  .tool-card:nth-child(5) { animation-delay: 0.16s; }
+  .tool-card:nth-child(6) { animation-delay: 0.20s; }
+  .tool-card:nth-child(7) { animation-delay: 0.24s; }
+  .tool-card:nth-child(8) { animation-delay: 0.28s; }
+</style>
+</head>
+<body>
+
+<!-- Mobile menu toggle -->
+<button class="menu-toggle" id="menuToggle" aria-label="菜单">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🤖</div>
+    <div>
+      <div class="logo-text">AI 导航</div>
+      <div class="logo-sub">精选 AI 工具集合</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">分类浏览</div>
+    <div class="sidebar-item active" data-category="all" onclick="filterCategory('all', this)">
+      <span class="s-icon">🏠</span> 全部工具
+      <span class="sidebar-count" id="sc-all">25</span>
+    </div>
+    <div class="sidebar-item" data-category="writing" onclick="filterCategory('writing', this)">
+      <span class="s-icon">✍️</span> AI 写作
+      <span class="sidebar-count" id="sc-writing">5</span>
+    </div>
+    <div class="sidebar-item" data-category="image" onclick="filterCategory('image', this)">
+      <span class="s-icon">🎨</span> AI 图像
+      <span class="sidebar-count" id="sc-image">5</span>
+    </div>
+    <div class="sidebar-item" data-category="video" onclick="filterCategory('video', this)">
+      <span class="s-icon">🎬</span> AI 视频
+      <span class="sidebar-count" id="sc-video">5</span>
+    </div>
+    <div class="sidebar-item" data-category="coding" onclick="filterCategory('coding', this)">
+      <span class="s-icon">💻</span> AI 编程
+      <span class="sidebar-count" id="sc-coding">5</span>
+    </div>
+    <div class="sidebar-item" data-category="search" onclick="filterCategory('search', this)">
+      <span class="s-icon">🔍</span> AI 搜索
+      <span class="sidebar-count" id="sc-search">3</span>
+    </div>
+    <div class="sidebar-item" data-category="office" onclick="filterCategory('office', this)">
+      <span class="s-icon">📊</span> AI 办公
+      <span class="sidebar-count" id="sc-office">2</span>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    共收录 <strong>25</strong> 款 AI 工具<br>
+    持续更新中 ✨
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- Hero + Search -->
+  <section class="hero">
+    <div class="hero-badge">✨ 精选 25+ 款 AI 工具</div>
+    <h1>发现最好的 <span>AI 工具</span></h1>
+    <p>一站式导航，快速找到适合你的 AI 神器</p>
+
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索 AI 工具，如 ChatGPT、Midjourney…" autocomplete="off">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+
+    <div class="search-engines">
+      <span>在以下平台搜索：</span>
+      <a class="engine-btn" id="googleBtn" href="#" target="_blank">🌐 Google</a>
+      <a class="engine-btn" id="bingBtn" href="#" target="_blank">🔷 Bing</a>
+      <a class="engine-btn" id="perplexityBtn" href="#" target="_blank">🔮 Perplexity</a>
+      <a class="engine-btn" id="baiduBtn" href="#" target="_blank">🔴 百度</a>
+    </div>
+  </section>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-item">🛠 工具总数 <span class="stat-num">25</span></div>
+    <div class="stat-item">📂 分类 <span class="stat-num">6</span></div>
+    <div class="stat-item">🆓 免费可用 <span class="stat-num">14</span></div>
+    <div class="stat-item">🔥 本周热门 <span class="stat-num">ChatGPT</span></div>
+  </div>
+
+  <!-- Category Tabs -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-cat="all" onclick="filterCategory('all', this)"><span class="t-emoji">🏠</span> 全部</button>
+    <button class="tab-btn" data-cat="writing" onclick="filterCategory('writing', this)"><span class="t-emoji">✍️</span> 写作</button>
+    <button class="tab-btn" data-cat="image" onclick="filterCategory('image', this)"><span class="t-emoji">🎨</span> 图像</button>
+    <button class="tab-btn" data-cat="video" onclick="filterCategory('video', this)"><span class="t-emoji">🎬</span> 视频</button>
+    <button class="tab-btn" data-cat="coding" onclick="filterCategory('coding', this)"><span class="t-emoji">💻</span> 编程</button>
+    <button class="tab-btn" data-cat="search" onclick="filterCategory('search', this)"><span class="t-emoji">🔍</span> 搜索</button>
+    <button class="tab-btn" data-cat="office" onclick="filterCategory('office', this)"><span class="t-emoji">📊</span> 办公</button>
+  </nav>
+
+  <!-- Tools Content -->
+  <div class="content">
+    <div class="section-header">
+      <div class="section-title" id="sectionTitle">全部工具</div>
+      <div class="section-count" id="sectionCount">显示 25 个工具</div>
+    </div>
+    <div class="tools-grid" id="toolsGrid"></div>
+  </div>
+
+</main>
+
+<script>
+// ===== Tool Data =====
+const TOOLS = [
+  // AI Writing
+  { id: 1, name: 'ChatGPT', emoji: '💬', category: 'writing', catLabel: 'AI 写作', desc: 'OpenAI 出品的对话 AI，写作、编程、分析样样精通。', url: 'https://chatgpt.com', free: true, iconBg: '#10a37f', iconFg: '#fff' },
+  { id: 2, name: 'Claude', emoji: '🌟', category: 'writing', catLabel: 'AI 写作', desc: 'Anthropic 出品，长文写作和推理能力一流，注重安全。', url: 'https://claude.ai', free: true, iconBg: '#D97706', iconFg: '#fff' },
+  { id: 3, name: 'Jasper', emoji: '✍️', category: 'writing', catLabel: 'AI 写作', desc: '专为营销团队设计的 AI 写作平台，支持多种内容格式。', url: 'https://jasper.ai', free: false, iconBg: '#7C3AED', iconFg: '#fff' },
+  { id: 4, name: 'Copy.ai', emoji: '📝', category: 'writing', catLabel: 'AI 写作', desc: '一键生成广告文案、邮件、博客等各类营销内容。', url: 'https://copy.ai', free: true, iconBg: '#2563EB', iconFg: '#fff' },
+  { id: 5, name: 'Notion AI', emoji: '📒', category: 'writing', catLabel: 'AI 写作', desc: '内嵌于 Notion 的 AI 助手，随时润色或扩写笔记内容。', url: 'https://notion.so', free: false, iconBg: '#000', iconFg: '#fff' },
+
+  // AI Image
+  { id: 6, name: 'Midjourney', emoji: '🎨', category: 'image', catLabel: 'AI 图像', desc: '顶级文生图工具，以艺术级画质著称，广受设计师喜爱。', url: 'https://midjourney.com', free: false, iconBg: '#1D1D1D', iconFg: '#fff' },
+  { id: 7, name: 'DALL-E 3', emoji: '🖼', category: 'image', catLabel: 'AI 图像', desc: 'OpenAI 出品，精准理解文字指令，生成高保真图像。', url: 'https://openai.com/dall-e-3', free: true, iconBg: '#10a37f', iconFg: '#fff' },
+  { id: 8, name: 'Stable Diffusion', emoji: '🌊', category: 'image', catLabel: 'AI 图像', desc: '开源图像生成模型，可本地部署，高度可定制化。', url: 'https://stability.ai', free: true, iconBg: '#6D28D9', iconFg: '#fff' },
+  { id: 9, name: 'Ideogram', emoji: '🔤', category: 'image', catLabel: 'AI 图像', desc: '文生图模型，特别擅长在画面中准确渲染文字。', url: 'https://ideogram.ai', free: true, iconBg: '#DB2777', iconFg: '#fff' },
+  { id: 10, name: 'Flux', emoji: '⚡', category: 'image', catLabel: 'AI 图像', desc: 'Black Forest Labs 出品，高速高质量图像生成模型。', url: 'https://blackforestlabs.ai', free: true, iconBg: '#1E3A5F', iconFg: '#fff' },
+
+  // AI Video
+  { id: 11, name: 'Sora', emoji: '🎥', category: 'video', catLabel: 'AI 视频', desc: 'OpenAI 文生视频旗舰产品，可生成长达一分钟的高清视频。', url: 'https://sora.com', free: false, iconBg: '#10a37f', iconFg: '#fff' },
+  { id: 12, name: 'Runway', emoji: '🏃', category: 'video', catLabel: 'AI 视频', desc: '专业 AI 视频创作平台，提供图生视频、视频编辑等功能。', url: 'https://runwayml.com', free: true, iconBg: '#7C3AED', iconFg: '#fff' },
+  { id: 13, name: 'Pika', emoji: '⚡', category: 'video', catLabel: 'AI 视频', desc: '快速将图片或文字转化为创意短视频，操作简单直观。', url: 'https://pika.art', free: true, iconBg: '#BE185D', iconFg: '#fff' },
+  { id: 14, name: 'HeyGen', emoji: '🎭', category: 'video', catLabel: 'AI 视频', desc: 'AI 数字人视频生成，支持多语言克隆讲解口播视频。', url: 'https://heygen.com', free: true, iconBg: '#0369A1', iconFg: '#fff' },
+  { id: 15, name: 'CapCut', emoji: '✂️', category: 'video', catLabel: 'AI 视频', desc: '字节跳动旗下视频编辑工具，内置丰富 AI 剪辑特效。', url: 'https://capcut.com', free: true, iconBg: '#000', iconFg: '#fff' },
+
+  // AI Coding
+  { id: 16, name: 'GitHub Copilot', emoji: '🐙', category: 'coding', catLabel: 'AI 编程', desc: 'IDE 内置 AI 编程助手，实时代码补全和函数生成。', url: 'https://github.com/features/copilot', free: false, iconBg: '#24292E', iconFg: '#fff' },
+  { id: 17, name: 'Cursor', emoji: '🖱', category: 'coding', catLabel: 'AI 编程', desc: '以 AI 为核心的代码编辑器，对话式代码生成与重构。', url: 'https://cursor.sh', free: true, iconBg: '#1A1A1A', iconFg: '#fff' },
+  { id: 18, name: 'v0', emoji: '🎯', category: 'coding', catLabel: 'AI 编程', desc: 'Vercel 出品，通过自然语言一键生成 React UI 组件代码。', url: 'https://v0.dev', free: true, iconBg: '#000', iconFg: '#fff' },
+  { id: 19, name: 'Bolt', emoji: '⚡', category: 'coding', catLabel: 'AI 编程', desc: '浏览器内 AI 全栈开发环境，直接生成并运行完整应用。', url: 'https://bolt.new', free: true, iconBg: '#F59E0B', iconFg: '#1A1A1A' },
+  { id: 20, name: 'Replit', emoji: '🔄', category: 'coding', catLabel: 'AI 编程', desc: '在线 AI 编程平台，内置部署能力，适合快速原型开发。', url: 'https://replit.com', free: true, iconBg: '#F26207', iconFg: '#fff' },
+
+  // AI Search
+  { id: 21, name: 'Perplexity', emoji: '🔮', category: 'search', catLabel: 'AI 搜索', desc: '实时联网的 AI 搜索引擎，回答附带详细信息来源。', url: 'https://perplexity.ai', free: true, iconBg: '#20B2AA', iconFg: '#fff' },
+  { id: 22, name: 'You.com', emoji: '🎯', category: 'search', catLabel: 'AI 搜索', desc: '隐私优先的 AI 搜索平台，可定制个人化搜索体验。', url: 'https://you.com', free: true, iconBg: '#7C3AED', iconFg: '#fff' },
+  { id: 23, name: 'Phind', emoji: '🛠', category: 'search', catLabel: 'AI 搜索', desc: '专为开发者设计的 AI 搜索，擅长技术和编程问题解答。', url: 'https://phind.com', free: true, iconBg: '#1E40AF', iconFg: '#fff' },
+
+  // AI Office
+  { id: 24, name: 'Microsoft 365 Copilot', emoji: '📊', category: 'office', catLabel: 'AI 办公', desc: 'Office 全套内置 AI，Word 写作、Excel 分析、PPT 生成。', url: 'https://microsoft.com/copilot', free: false, iconBg: '#0078D4', iconFg: '#fff' },
+  { id: 25, name: 'Gamma', emoji: '🟣', category: 'office', catLabel: 'AI 办公', desc: 'AI 驱动的演示文稿创作工具，一句话生成精美幻灯片。', url: 'https://gamma.app', free: true, iconBg: '#8B5CF6', iconFg: '#fff' },
+];
+
+// Category config
+const CATEGORIES = {
+  all:     { label: '全部工具', emoji: '🏠' },
+  writing: { label: 'AI 写作',  emoji: '✍️' },
+  image:   { label: 'AI 图像',  emoji: '🎨' },
+  video:   { label: 'AI 视频',  emoji: '🎬' },
+  coding:  { label: 'AI 编程',  emoji: '💻' },
+  search:  { label: 'AI 搜索',  emoji: '🔍' },
+  office:  { label: 'AI 办公',  emoji: '📊' },
+};
+
+const CATEGORY_COLORS = {
+  writing: { bg: '#EEF2FF', text: '#4338CA' },
+  image:   { bg: '#FDF4FF', text: '#7E22CE' },
+  video:   { bg: '#FFF7ED', text: '#C2410C' },
+  coding:  { bg: '#F0FDF4', text: '#15803D' },
+  search:  { bg: '#F0FDFA', text: '#0F766E' },
+  office:  { bg: '#EFF6FF', text: '#1D4ED8' },
+};
+
+let currentCategory = 'all';
+let currentQuery = '';
+
+// ===== Render =====
+function renderTools(tools) {
+  const grid = document.getElementById('toolsGrid');
+  if (!tools.length) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="e-icon">🔭</div>
+        <h3>没有找到相关工具</h3>
+        <p>试试其他关键词，或者 <a href="#" style="color:var(--accent)">清空搜索</a></p>
+      </div>`;
+    return;
+  }
+
+  // Group by category when showing all
+  if (currentCategory === 'all' && !currentQuery) {
+    const groups = {};
+    tools.forEach(t => {
+      if (!groups[t.category]) groups[t.category] = [];
+      groups[t.category].push(t);
+    });
+    let html = '';
+    Object.entries(groups).forEach(([cat, items]) => {
+      const cfg = CATEGORIES[cat];
+      html += `<div class="category-section" style="grid-column:1/-1">
+        <div class="category-section-title">${cfg.emoji} ${cfg.label} <span style="font-size:13px;color:var(--text-muted);font-weight:400">(${items.length})</span></div>
+        <div class="tools-grid" style="margin:0">`;
+      items.forEach(t => { html += toolCardHTML(t); });
+      html += `</div></div>`;
+    });
+    grid.style.display = 'block';
+    grid.innerHTML = html;
+  } else {
+    grid.style.display = 'grid';
+    grid.innerHTML = tools.map(toolCardHTML).join('');
+  }
+}
+
+function toolCardHTML(t) {
+  const cc = CATEGORY_COLORS[t.category] || { bg: '#F3F4F6', text: '#374151' };
+  const freeBadge = t.free
+    ? `<span class="free-badge" style="background:#ECFDF5;color:#059669">免费</span>`
+    : `<span class="free-badge" style="background:#FEF3C7;color:#D97706">付费</span>`;
+  return `
+    <div class="tool-card" onclick="openTool('${t.url}', '${t.name}')">
+      <div class="card-top">
+        <div class="tool-icon" style="background:${t.iconBg};color:${t.iconFg}">${t.emoji}</div>
+        <div>
+          <div class="tool-name">${t.name}</div>
+          <span class="tool-category-tag" style="background:${cc.bg};color:${cc.text}">${t.catLabel}</span>
+        </div>
+      </div>
+      <div class="tool-desc">${t.desc}</div>
+      <div class="card-bottom">
+        <span class="tool-link">立即体验 →</span>
+        ${freeBadge}
+      </div>
+    </div>`;
+}
+
+function openTool(url, name) {
+  window.open(url, '_blank');
+}
+
+// ===== Filter Logic =====
+function applyFilter() {
+  let filtered = TOOLS;
+  if (currentCategory !== 'all') {
+    filtered = filtered.filter(t => t.category === currentCategory);
+  }
+  if (currentQuery) {
+    const q = currentQuery.toLowerCase();
+    filtered = filtered.filter(t =>
+      t.name.toLowerCase().includes(q) ||
+      t.desc.toLowerCase().includes(q) ||
+      t.catLabel.toLowerCase().includes(q)
+    );
+  }
+
+  const cat = CATEGORIES[currentCategory];
+  document.getElementById('sectionTitle').textContent = currentQuery
+    ? `搜索 "${currentQuery}"` : cat.label;
+  document.getElementById('sectionCount').textContent = `显示 ${filtered.length} 个工具`;
+
+  renderTools(filtered);
+  updateSearchEngines(currentQuery);
+}
+
+function filterCategory(cat, el) {
+  currentCategory = cat;
+
+  // Update tabs
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  // Update sidebar
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.toggle('active', b.dataset.category === cat));
+
+  applyFilter();
+  // Close sidebar on mobile
+  if (window.innerWidth < 769) closeSidebar();
+}
+
+// ===== Search =====
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+
+searchInput.addEventListener('input', function() {
+  currentQuery = this.value.trim();
+  searchClear.style.display = currentQuery ? 'block' : 'none';
+  applyFilter();
+});
+
+function clearSearch() {
+  searchInput.value = '';
+  currentQuery = '';
+  searchClear.style.display = 'none';
+  searchInput.focus();
+  applyFilter();
+}
+
+function updateSearchEngines(q) {
+  const enc = encodeURIComponent(q || 'AI 工具');
+  document.getElementById('googleBtn').href = `https://google.com/search?q=${enc}`;
+  document.getElementById('bingBtn').href = `https://bing.com/search?q=${enc}`;
+  document.getElementById('perplexityBtn').href = `https://perplexity.ai/search?q=${enc}`;
+  document.getElementById('baiduBtn').href = `https://baidu.com/s?wd=${enc}`;
+}
+
+// ===== Sidebar Counts =====
+function updateSidebarCounts() {
+  const cats = ['writing','image','video','coding','search','office'];
+  cats.forEach(c => {
+    const el = document.getElementById('sc-' + c);
+    if (el) el.textContent = TOOLS.filter(t => t.category === c).length;
+  });
+  document.getElementById('sc-all').textContent = TOOLS.length;
+}
+
+// ===== Mobile Sidebar =====
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('show');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+// ===== Init =====
+updateSidebarCounts();
+updateSearchEngines('');
+applyFilter();
+</script>
+</body>
+</html>
