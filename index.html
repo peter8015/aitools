@@ -27,6 +27,8 @@
     --radius-sm: 8px;
     --shadow: 0 2px 12px rgba(0,0,0,0.06);
     --shadow-hover: 0 8px 28px rgba(79,70,229,0.14);
+    --tesla: #E31937;
+    --tesla-soft: rgba(227,25,55,0.08);
     --font: 'Plus Jakarta Sans', sans-serif;
   }
 
@@ -222,6 +224,109 @@
     display: inline-flex; align-items: center; gap: 4px;
   }
   .engine-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* ===== Tesla News ===== */
+  .news-panel {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+  }
+  .news-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F6 100%);
+    border: 1px solid rgba(227,25,55,0.16);
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .news-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .news-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--tesla);
+    background: var(--tesla-soft);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .news-title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .news-subtitle {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .news-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .news-status {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .news-refresh {
+    border: 1px solid rgba(227,25,55,0.24);
+    background: #fff;
+    color: var(--tesla);
+    border-radius: 999px;
+    padding: 8px 13px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .news-refresh:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(227,25,55,0.12); }
+  .news-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .news-card {
+    background: rgba(255,255,255,0.9);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    min-height: 168px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .news-rank {
+    width: 28px; height: 28px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 9px;
+    background: var(--tesla);
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .news-card-title { font-size: 14px; font-weight: 750; line-height: 1.45; color: var(--text-primary); }
+  .news-meta { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+  .news-link { margin-top: auto; color: var(--tesla); font-size: 12px; font-weight: 750; }
+  .news-error {
+    grid-column: 1/-1;
+    padding: 16px;
+    border-radius: 14px;
+    background: #FFF7ED;
+    color: #9A3412;
+    font-size: 13px;
+    line-height: 1.6;
+  }
 
   /* ===== Category Tabs ===== */
   .tab-bar {
@@ -435,6 +540,10 @@
     .content { padding: 24px 16px; }
     .tab-bar { padding: 0 16px; }
     .stats-bar { padding: 10px 16px; gap: 12px; }
+    .news-panel { padding: 18px 16px; }
+    .news-header { flex-direction: column; }
+    .news-actions { justify-content: flex-start; }
+    .news-list { grid-template-columns: 1fr; }
     .tools-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   }
   @media (max-width: 480px) {
@@ -545,6 +654,24 @@
     <div class="stat-item">🔥 本周热门 <span class="stat-num">ChatGPT</span></div>
   </div>
 
+  <!-- Tesla News -->
+  <section class="news-panel" aria-labelledby="teslaNewsTitle">
+    <div class="news-shell">
+      <div class="news-header">
+        <div>
+          <div class="news-kicker">⚡ Hourly brief</div>
+          <h2 class="news-title" id="teslaNewsTitle">Tesla 新闻 Top 3</h2>
+          <p class="news-subtitle">每隔 1 小时自动抓取 Tesla 最新新闻，并整理展示前三条重点动态。</p>
+        </div>
+        <div class="news-actions">
+          <span class="news-status" id="teslaNewsStatus">准备加载…</span>
+          <button class="news-refresh" type="button" onclick="loadTeslaNews(true)">立即刷新</button>
+        </div>
+      </div>
+      <div class="news-list" id="teslaNewsList" aria-live="polite"></div>
+    </div>
+  </section>
+
   <!-- Category Tabs -->
   <nav class="tab-bar">
     <button class="tab-btn active" data-cat="all" onclick="filterCategory('all', this)"><span class="t-emoji">🏠</span> 全部</button>
@@ -630,6 +757,92 @@ const CATEGORY_COLORS = {
 
 let currentCategory = 'all';
 let currentQuery = '';
+const TESLA_NEWS_REFRESH_MS = 60 * 60 * 1000;
+const TESLA_NEWS_FEED = 'https://news.google.com/rss/search?q=Tesla%20when:24h&hl=zh-CN&gl=US&ceid=US:zh-Hans';
+
+// ===== Tesla News =====
+function formatNewsTime(dateValue) {
+  if (!dateValue) return '刚刚更新';
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return '刚刚更新';
+  return new Intl.DateTimeFormat('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
+}
+
+function stripHtml(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  return div.textContent || div.innerText || '';
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>'\"]/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '\"': '&quot;',
+  }[char]));
+}
+
+function safeUrl(value) {
+  try {
+    const url = new URL(value || 'https://news.google.com/search?q=Tesla');
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : 'https://news.google.com/search?q=Tesla';
+  } catch {
+    return 'https://news.google.com/search?q=Tesla';
+  }
+}
+
+function extractSource(item) {
+  const titleParts = (item.title || '').split(' - ');
+  return item.source?.textContent || titleParts[titleParts.length - 1] || 'Google News';
+}
+
+function renderTeslaNews(items) {
+  const list = document.getElementById('teslaNewsList');
+  list.innerHTML = items.slice(0, 3).map((item, index) => {
+    const title = escapeHtml(stripHtml(item.title || 'Tesla 最新新闻'));
+    const source = escapeHtml(extractSource(item));
+    const time = escapeHtml(formatNewsTime(item.pubDate || item.published));
+    const link = safeUrl(item.link);
+    return `
+      <article class="news-card">
+        <span class="news-rank">${index + 1}</span>
+        <a class="news-card-title" href="${link}" target="_blank" rel="noopener">${title}</a>
+        <div class="news-meta">${source} · ${time}</div>
+        <a class="news-link" href="${link}" target="_blank" rel="noopener">阅读全文 →</a>
+      </article>`;
+  }).join('');
+}
+
+function renderTeslaNewsError(message) {
+  document.getElementById('teslaNewsList').innerHTML = `
+    <div class="news-error">${escapeHtml(message)}<br>你也可以打开 <a href="https://news.google.com/search?q=Tesla" target="_blank" rel="noopener">Google News Tesla 搜索</a> 查看实时结果。</div>`;
+}
+
+async function loadTeslaNews(manual = false) {
+  const status = document.getElementById('teslaNewsStatus');
+  status.textContent = manual ? '正在手动刷新…' : '正在加载新闻…';
+  try {
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(TESLA_NEWS_FEED)}`;
+    const response = await fetch(proxyUrl, { cache: 'no-store' });
+    if (!response.ok) throw new Error('新闻源暂时不可用');
+    const xmlText = await response.text();
+    const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    const items = Array.from(doc.querySelectorAll('item')).map(item => ({
+      title: item.querySelector('title')?.textContent,
+      link: item.querySelector('link')?.textContent,
+      pubDate: item.querySelector('pubDate')?.textContent,
+      source: item.querySelector('source'),
+    }));
+    if (!items.length) throw new Error('没有找到新闻');
+    renderTeslaNews(items);
+    status.textContent = `已更新：${formatNewsTime(new Date())} · 每小时自动刷新`;
+  } catch (error) {
+    renderTeslaNewsError(`无法自动抓取 Tesla 新闻：${error.message}`);
+    status.textContent = '自动抓取失败';
+  }
+}
 
 // ===== Render =====
 function renderTools(tools) {
@@ -781,6 +994,8 @@ function closeSidebar() {
 // ===== Init =====
 updateSidebarCounts();
 updateSearchEngines('');
+loadTeslaNews();
+setInterval(loadTeslaNews, TESLA_NEWS_REFRESH_MS);
 applyFilter();
 </script>
 </body>
